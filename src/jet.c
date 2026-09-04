@@ -46,12 +46,12 @@ void jet_update(int cam_x) {
     for (int i = 0; i < NB_DROPS; i++) {
         OBJ_ATTR *o = &oam_mem[OAM_DROP0 + i];
         if (!active) { obj_hide(o); continue; }
-        // t in 0..1 along the arc, shifted by the phase so drops appear to travel.
-        int t256 = ((i * 256) / NB_DROPS + phase) & 0xFF;
-        int x = mx + (lion.facing * JET_DX * t256) / 256;
-        int y = my + (JET_DY * t256 * t256) / (256 * 256);
-        // colours fan out: drop i takes colour i modulo the unlocked count
-        int colour = i % game.colors;
+        // t in 0..1 (as 0..255) along the arc, shifted by the phase so drops appear to travel.
+        int t256 = ((i * 256) / NB_DROPS + phase) & 0xFF;      // constant divisor: folded at compile time
+        int x = mx + ((lion.facing * JET_DX * t256) >> 8);
+        int y = my + ((JET_DY * t256 * t256) >> 16);
+        // colours fan out: drop i takes colour i wrapped on the unlocked count
+        int colour = i; while (colour >= game.colors) colour -= game.colors;
         obj_set_attr(o,
             ATTR0_SQUARE | ATTR0_4BPP | ATTR0_Y((y - 4) & 0xFF),
             ATTR1_SIZE_8 | ATTR1_X((x - cam_x - 4) & 0x1FF),

@@ -114,6 +114,7 @@ static void update_play(void) {
     paint_scan_step();
     game.progress = paint_progress_permil();
     if (DEBUG->cheat_win) game.progress = 1000;
+    if (DEBUG->cheat_colors) game.colors = DEBUG->cheat_colors > NB_COLORS ? NB_COLORS : (int)DEBUG->cheat_colors;
     if (game.progress >= game.win_permil && !game.won) {
         game.won = 1;
         if (cfg.arcade) game.arcade_time += game.time;

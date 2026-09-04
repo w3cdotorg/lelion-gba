@@ -30,3 +30,15 @@ shot p2_sweep
 keys
 run 10
 expect32 0x02030024 0
+# performance: seven colours, puking while sweeping, the loop must not drop frames
+poke32 0x02030088 7
+peek32 0x02030010
+keys A,LEFT
+run 120
+keys A,RIGHT
+run 120
+keys
+poke32 0x02030088 0
+# 240 harness frames later the game's frame counter must have advanced by 240 (no dropped frames)
+expect_range32 0x02030010 905 911
+shot p2_seven_colours

@@ -17,7 +17,7 @@ static void hud_box(u8 *page, int x0, int y0, int w, int h, u8 c) {
     for (int y = y0; y < y0 + h; y++) hud_hline(page, x0, x0 + w, y, c);
 }
 
-IWRAM_CODE void hud_draw(void) {
+IWRAM_CODE ARM_CODE void hud_draw(void) {
     u8 *page = (u8 *)vid_page;
     // Bar: dark frame, white fill proportional to progress, win marker at the threshold.
     hud_box(page, BAR_X - 1, BAR_Y - 1, BAR_W + 2, BAR_H + 2, PAL_HUD_FG);

@@ -11,7 +11,7 @@ IWRAM_CODE void town_init(int level) {
             town[y][x] = src[y * TOWN_W + x] ? PAL_BUILDING : 0;
 }
 
-IWRAM_CODE void town_render(int cam_x) {
+IWRAM_CODE ARM_CODE void town_render(int cam_x) {
     cam_x &= ~1;  // 16-bit aligned source for DMA
     u8 *page = (u8 *)vid_page;
     for (int y = 0; y < TOWN_H; y++)
@@ -33,7 +33,7 @@ void panel_render(int y0, int y1) {
         dma3_fill(page + y * SCREEN_WIDTH, PAL_HUD_BG * 0x01010101u, SCREEN_WIDTH);
 }
 
-IWRAM_CODE void sky_render(void) {
+IWRAM_CODE ARM_CODE void sky_render(void) {
     u8 *page = (u8 *)vid_page;
     if (sky_rows[0] == 0)
         for (int y = 0; y < SKY_H; y++) {

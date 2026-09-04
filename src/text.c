@@ -14,7 +14,7 @@ static inline void plot(u8 *page, int x, int y, u8 c) {
     *p = (x & 1) ? ((*p & 0x00FF) | (c << 8)) : ((*p & 0xFF00) | c);
 }
 
-IWRAM_CODE void text_draw(int x, int y, const char *s, u8 colour, int scale) {
+IWRAM_CODE ARM_CODE void text_draw(int x, int y, const char *s, u8 colour, int scale) {
     u8 *page = (u8 *)vid_page;
     for (; *s; s++, x += 6 * scale) {
         const u8 *g = &font_glyphs[glyph_index(*s) * 8];

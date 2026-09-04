@@ -23,25 +23,37 @@ IWRAM_CODE void paint_init(void) {
         }
 }
 
-IWRAM_CODE void paint_stamp(int wx, int wy, int radius) {
+#define STAMP_RADIUS_MAX 9
+
+// No divisions in the inner loop (the ARM7 has no divide instruction): the speckle threshold per
+// squared distance is tabulated once per radius, colours are picked with a multiply.
+IWRAM_CODE ARM_CODE void paint_stamp(int wx, int wy, int radius) {
+    static int last_radius = -1;
+    static u8 thr[STAMP_RADIUS_MAX * STAMP_RADIUS_MAX + 1];   // 0..255 chance per d2
     if (game.colors <= 0) return;
+    if (radius > STAMP_RADIUS_MAX) radius = STAMP_RADIUS_MAX;
     int r2 = radius * radius;
+    if (radius != last_radius) {
+        last_radius = radius;
+        for (int d2 = 0; d2 <= r2; d2++) thr[d2] = (70 - 55 * d2 / r2) * 256 / 100;   // dense centre, sparse rim
+    }
+    u32 colours = game.colors;
     for (int dy = -radius; dy <= radius; dy++) {
         int y = wy + dy;
         if (y < 0 || y >= TOWN_H) continue;
+        u8 *row = town[y];
         for (int dx = -radius; dx <= radius; dx++) {
             int x = wx + dx;
             int d2 = dx * dx + dy * dy;
             if (x < 0 || x >= TOWN_W || d2 > r2) continue;
-            if (town[y][x] == 0) continue;                 // sky: nothing to paint
-            int density = 70 - 55 * d2 / r2;               // dense centre, sparse rim
-            if ((int)(rnd() % 100) < density)
-                town[y][x] = PAL_PAINT0 + rnd() % game.colors;
+            if (row[x] == 0) continue;                     // sky: nothing to paint
+            if ((rnd() & 0xFF) < thr[d2])
+                row[x] = PAL_PAINT0 + ((rnd() * colours) >> 16);
         }
     }
 }
 
-IWRAM_CODE void paint_scan_step(void) {
+IWRAM_CODE ARM_CODE void paint_scan_step(void) {
     for (int s = 0; s < SLICE; s++) {
         int cy = scan_row;
         for (int cx = 0; cx < GRID_W; cx++) {

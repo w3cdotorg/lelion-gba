@@ -71,6 +71,9 @@ static inline u32 rnd(void) {
     return rnd_seed >> 16;
 }
 
+// Hot functions: place in IWRAM and compile as 32-bit ARM code.
+#define ARM_CODE __attribute__((target("arm")))
+
 // Inclusive clamp (tonc's clamp() excludes the upper bound).
 static inline s32 borne(s32 v, s32 lo, s32 hi) { return v < lo ? lo : (v > hi ? hi : v); }
 
@@ -110,5 +113,6 @@ typedef struct {
     s32 boss_x;                 // +120
     u32 arcade, stage;          // +124, +128
     u32 new_best;               // +132
+    u32 cheat_colors;           // +136 written by the test harness: forces the unlocked colour count
 } DebugState;
 #define DEBUG ((volatile DebugState *)0x02030000)
