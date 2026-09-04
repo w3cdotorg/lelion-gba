@@ -3,17 +3,16 @@
 #---------------------------------------------------------------------------------
 .SUFFIXES:
 #---------------------------------------------------------------------------------
-# Build inside the official devkitPro image (no local toolchain needed).
-.PHONY: docker
-docker:
-	docker run --rm -v "$(CURDIR):/work" -w /work devkitpro/devkitarm:latest make
-
+# `make docker` builds inside the official devkitPro image (no local toolchain needed).
+# Everything else needs DEVKITARM.
 ifneq ($(MAKECMDGOALS),docker)
 ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment, or run `make docker`")
 endif
 
 include $(DEVKITARM)/gba_rules
+LIBTONC := $(DEVKITPRO)/libtonc
+LIBGBA  := $(DEVKITPRO)/libgba
 
 TARGET   := lelion
 BUILD    := build
@@ -81,3 +80,7 @@ $(OFILES_SOURCES) : $(HFILES)
 endif
 #---------------------------------------------------------------------------------
 endif
+
+.PHONY: docker
+docker:
+	docker run --rm -v "$(CURDIR):/work" -w /work devkitpro/devkitarm:latest make

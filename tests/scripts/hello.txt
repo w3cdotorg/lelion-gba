@@ -1,0 +1,9 @@
+run 10
+shot hello_depart
+keys RIGHT,DOWN
+run 30
+keys
+run 2
+shot hello_deplace
+pixel 100 60
+pixel 168 128
