@@ -13,11 +13,15 @@ jobs:
     container: devkitpro/devkitarm:latest
     steps:
       - uses: actions/checkout@v4
-      - run: make
+      - run: make && make DEBUG_HOOKS=1
       - uses: actions/upload-artifact@v4
         with:
           name: lelion.gba
           path: lelion.gba
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lelion-debug.gba
+          path: lelion-debug.gba
 
   test:
     name: Headless tests (libmgba)
@@ -28,8 +32,11 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: lelion.gba
+      - uses: actions/download-artifact@v4
+        with:
+          name: lelion-debug.gba
       - run: sudo apt-get update && sudo apt-get install -y libmgba-dev
-      - run: HARNESS_CFLAGS="" tests/run.sh lelion.gba
+      - run: HARNESS_CFLAGS="" tests/run.sh lelion-debug.gba lelion.gba
       - uses: actions/upload-artifact@v4
         if: always()
         with:

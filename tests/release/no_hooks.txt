@@ -1,0 +1,14 @@
+# Release ROM: the test hooks must be inert. Start a level, poke cheat_win and cheat_colors,
+# the game must keep playing with no colours.
+run 30
+keys START
+run 4
+keys
+run 200
+expect32 0x02030058 2
+poke32 0x0203006C 1
+poke32 0x02030088 7
+run 10
+expect32 0x02030058 2
+expect32 0x02030024 0
+expect32 0x02030018 0

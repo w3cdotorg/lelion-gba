@@ -107,13 +107,13 @@ typedef struct {
     u32 continue_count;         // +92
     u32 time;                   // +96  play frames
     u32 difficulty, level;      // +100, +104
-    u32 cheat_win;              // +108 written by the test harness: forces a win
+    u32 cheat_win;              // +108 test hook (DEBUG_HOOKS builds only): forces a win
     u32 hits;                   // +112
     u32 boss_state;             // +116
     s32 boss_x;                 // +120
     u32 arcade, stage;          // +124, +128
     u32 new_best;               // +132
-    u32 cheat_colors;           // +136 written by the test harness: forces the unlocked colour count
+    u32 cheat_colors;           // +136 test hook (DEBUG_HOOKS builds only): forces the unlocked colour count
     u32 load_vcount;            // +140 scanline reached when the frame's work is done (160 = vblank start, 228 = full frame)
     u32 load_max;               // +144 worst scanline since boot
 } DebugState;

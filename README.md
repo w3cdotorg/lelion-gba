@@ -35,7 +35,8 @@ layer in mode 4, and a chiptune soundtrack on the Game Boy sound channels.
 No local toolchain is required: the build runs inside the official devkitPro Docker image.
 
 ```sh
-make docker        # produces lelion.gba
+make docker        # produces lelion.gba (release)
+make docker-debug  # produces lelion-debug.gba, with the test hooks compiled in
 ```
 
 With devkitARM installed locally (`DEVKITARM` set), plain `make` works too.
@@ -62,8 +63,11 @@ tests/             headless checks: harness.c (libmgba) runs the ROM, presses ke
 tests/run.sh            # needs libmgba (brew install mgba / apt install libmgba-dev)
 ```
 
+Scenarios run against `lelion-debug.gba`; a last check makes sure the release ROM ignores the hooks.
+
 The game exposes a small debug block at `0x02030000` (lion position, camera, progress, lives,
 state, CPU load as the scanline reached when the frame's work is done...) that the scripts assert
-on; `cheat_win` and `cheat_colors` in that block let a test force a victory or a colour count.
+on; in the debug build only, `cheat_win` and `cheat_colors` in that block let a test force a
+victory or a colour count. The release ROM does not read them.
 
 See `PLAN.md` for the porting plan and progress.

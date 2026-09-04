@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------------
 # `make docker` builds inside the official devkitPro image (no local toolchain needed).
 # Everything else needs DEVKITARM.
-ifneq ($(MAKECMDGOALS),docker)
+ifeq ($(filter docker docker-debug,$(MAKECMDGOALS)),)
 ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment, or run `make docker`")
 endif
@@ -14,8 +14,10 @@ include $(DEVKITARM)/gba_rules
 LIBTONC := $(DEVKITPRO)/libtonc
 LIBGBA  := $(DEVKITPRO)/libgba
 
-TARGET   := lelion
-BUILD    := build
+# DEBUG_HOOKS=1 builds lelion-debug.gba: same game plus the test hooks (cheat_win, cheat_colors)
+# read from the debug block. The release ROM ignores them.
+TARGET   := lelion$(if $(DEBUG_HOOKS),-debug)
+BUILD    := build$(if $(DEBUG_HOOKS),-debug)
 SOURCES  := src assets/generated
 INCLUDES := src assets/generated
 DATA     :=
@@ -23,7 +25,7 @@ MUSIC    :=
 
 ARCH     := -mthumb -mthumb-interwork
 CFLAGS   := -g -Wall -Wextra -O2 -mcpu=arm7tdmi -mtune=arm7tdmi $(ARCH) -fomit-frame-pointer -ffast-math
-CFLAGS   += $(INCLUDE) -DARM7TDMI
+CFLAGS   += $(INCLUDE) -DARM7TDMI $(if $(DEBUG_HOOKS),-DDEBUG_HOOKS)
 CXXFLAGS := $(CFLAGS) -fno-rtti -fno-exceptions
 ASFLAGS  := -g $(ARCH)
 LDFLAGS   = -g $(ARCH) -Wl,-Map,$(notdir $*.map)
@@ -60,7 +62,7 @@ $(BUILD):
 
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba $(TARGET).map
+	@rm -fr build build-debug lelion.elf lelion.gba lelion.map lelion-debug.elf lelion-debug.gba lelion-debug.map
 
 #---------------------------------------------------------------------------------
 else
@@ -81,6 +83,9 @@ endif
 #---------------------------------------------------------------------------------
 endif
 
-.PHONY: docker
+.PHONY: docker docker-debug
 docker:
 	docker run --rm -v "$(CURDIR):/work" -w /work devkitpro/devkitarm:latest make
+
+docker-debug:
+	docker run --rm -v "$(CURDIR):/work" -w /work devkitpro/devkitarm:latest make DEBUG_HOOKS=1
