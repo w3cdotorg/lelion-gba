@@ -6,6 +6,7 @@
 #include "jet.h"
 #include "hud.h"
 #include "actors.h"
+#include "audio.h"
 
 Game game;
 u32 rnd_seed = 0x1E51ABCD;
@@ -45,6 +46,8 @@ int main(void) {
     lion_init();
     jet_init();
     actors_init();
+    audio_init();
+    music_play(THEME_TOWN, 0);
     game.colors = 0;
     draw_static((u16 *)vid_mem_front);
     draw_static((u16 *)vid_mem_back);
@@ -61,7 +64,10 @@ int main(void) {
         jet_update(cam);
         paint_scan_step();
         game.progress = paint_progress_permil();
-        if (game.progress >= WIN_PERMIL) game.won = 1;
+        if (game.progress >= WIN_PERMIL && !game.won) { game.won = 1; sfx_play(sfx_victoire, SFX_VICTOIRE_LEN); }
+        music_set_intensity(game.progress * 3 / WIN_PERMIL);
+        sfx_puke(lion.puking && game.colors > 0 && !game.won);
+        audio_update();
 
         town_render(cam);
         hud_draw();
@@ -79,6 +85,10 @@ int main(void) {
         DEBUG->lives = game.lives;
         DEBUG->invuln = game.invuln;
         DEBUG->over = game.over;
+        DEBUG->music_step = music_step;
+        DEBUG->music_intensity = music_intensity;
+        DEBUG->sfx_frames_left = sfx_frames_left;
+        DEBUG->sound_on = REG_SNDSTAT & 0x8F;   // master enable + active channel flags
         DEBUG->n_pickups = actors_count(ACTOR_PICKUP);
         DEBUG->n_enemies = actors_count(ACTOR_SAUCER) + actors_count(ACTOR_LADYBUG);
         const Actor *p = actors_first(ACTOR_PICKUP);

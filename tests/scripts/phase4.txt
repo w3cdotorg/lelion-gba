@@ -1,0 +1,16 @@
+# +72 music_step, +76 intensity, +80 sfx_frames_left, +84 sound status (bit 7 master, bits 0-3 channels active)
+run 30
+expect_range32 0x02030054 0x81 0x8F
+expect32 0x0203004C 0
+run 60
+# the sequencer advances: 60 frames = 4 eighth notes at 120 BPM
+expect_range32 0x02030048 3 8
+# collect the first pickup: the pickup sound is playing right after the pick-up
+run 10
+keys RIGHT
+run 48
+expect32 0x02030018 1
+expect_range32 0x02030050 1 20
+keys
+run 40
+expect32 0x02030050 0

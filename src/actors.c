@@ -2,6 +2,7 @@
 #include "actors.h"
 #include "lion.h"
 #include "sprites.h"
+#include "audio.h"
 
 #define OAM_ACTOR0    12
 #define TILE_SAUCER   (512 + 40)
@@ -113,6 +114,7 @@ void actors_update(void) {
         if (!overlaps(a, lx, ly, lw, lh)) continue;
         if (a->type == ACTOR_PICKUP) {
             if (a->param == game.colors) game.colors++;
+            sfx_play(sfx_pickup, SFX_PICKUP_LEN);
             a->type = ACTOR_NONE;
             next_pickup_frame = f + PICKUP_DELAY;
         } else if (game.invuln == 0) {

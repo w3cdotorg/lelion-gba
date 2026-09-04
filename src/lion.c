@@ -1,6 +1,7 @@
 // The lion: movement with a little inertia, facing, puke pose. Sprite in OAM slot 0.
 #include "lion.h"
 #include "sprites.h"
+#include "audio.h"
 
 #define LION_SPEED   FIX(3) / 2          // 1.5 px/frame  (350 px/s on a 2000 px town -> 84 px/s here)
 #define LION_ACCEL   (FIX(1) / 5)
@@ -46,6 +47,7 @@ void lion_update(void) {
 void lion_hit(int from_world_x) {
     game.lives--;
     game.invuln = INVULN_FRAMES;
+    sfx_play(sfx_mort, SFX_MORT_LEN);
     lion.kx = (UNFIX(lion.x) + 16 < from_world_x) ? -FIX(4) : FIX(4);
     if (game.lives <= 0) { game.lives = 0; game.over = 1; }
 }

@@ -72,5 +72,9 @@ typedef struct {
     u32 invuln;                 // +56
     s32 enemy_x, enemy_y;       // +60, +64  first live enemy (world)
     u32 over;                   // +68
+    u32 music_step;             // +72
+    u32 music_intensity;        // +76
+    u32 sfx_frames_left;        // +80
+    u32 sound_on;               // +84  REG_SNDSTAT master enable
 } DebugState;
 #define DEBUG ((volatile DebugState *)0x02030000)

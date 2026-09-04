@@ -22,7 +22,7 @@ Target: the same game as the Godot version, on a 240×160 screen.
 - [x] 1. Scrolling town: skyline bitmap, camera, lion sprite and movement
 - [x] 2. Painting: rainbow jet, paint into the bitmap, coverage and progress bar
 - [x] 3. Pickups and enemies: color dots, saucer, ladybug, hearts, invulnerability
-- [ ] 4. Sound: sequencer on GB channels, town theme, effects
+- [x] 4. Sound: sequencer on GB channels, town theme, effects
 - [ ] 5. Menus: title, difficulty, level, settings, READY? VOMIT!, CONTINUE?, summary
 - [ ] 6. Boss level and arcade mode
 - [ ] 7. SRAM saves, CI release, ROM playable on the website
