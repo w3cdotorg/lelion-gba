@@ -1,0 +1,25 @@
+# SRAM at 0x0E000000: 0..3 "LELN", 5 difficulty, 6 level, 10.. best[d][l] u16 seconds; +132 new_best
+run 30
+# changing the difficulty on the title writes the config to SRAM
+keys RIGHT
+run 4
+keys
+run 4
+expect8 0x0E000000 0x4C
+expect8 0x0E000001 0x45
+expect8 0x0E000005 1
+expect8 0x0E000006 0
+# win the level (normal, skyline): the record lands in SRAM as best[1][0]
+keys START
+run 4
+keys
+run 200
+expect32 0x02030058 2
+run 120
+poke32 0x0203006C 1
+run 5
+poke32 0x0203006C 0
+expect32 0x02030058 5
+expect32 0x02030084 1
+expect_range8 0x0E000010 1 5
+shot p7_new_best

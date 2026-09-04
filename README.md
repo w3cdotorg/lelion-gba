@@ -8,6 +8,28 @@ This is a from-scratch rewrite that keeps the game design and re-scales everythi
 240×160 screen: a 480 px wide town that scrolls with the lion, a 32×32 lion, a bitmap paint
 layer in mode 4, and a chiptune soundtrack on the Game Boy sound channels.
 
+## What's in the ROM
+
+- Three levels (Skyline, Metropolis, Village), three difficulties (Easy: 3 hearts and heart
+  pickups, paint 85 %; Normal: 3 hearts, 90 %; Hard: 1 heart, 95 %), and an Arcade mode that
+  chains the nine stages with a total time.
+- The rainbow jet paints the scrolling town; progress is measured on real coverage, with the
+  finish line marked on the HUD bar.
+- Flying saucer, ladybug, and in the Village the giant painter who walks to the centre of the
+  town and back, switching sides.
+- READY? VOMIT! intro, pause, CONTINUE? countdown, end-of-level summary with FLAWLESS! and
+  NEW BEST!, best times saved to the cartridge SRAM along with your settings.
+- Chiptune on the Game Boy channels (melody, arpeggio, bass, drums; the arpeggio and melody
+  join in as you paint), boss theme in the Village, PCM sound effects on DirectSound.
+
+| Action | Keys |
+|---|---|
+| Move | D-pad |
+| Puke | A |
+| Pause / resume | Start |
+| Quit to title (paused) | Select |
+| Menus | D-pad to choose, Start or A to confirm, R for next level on the summary |
+
 ## Building
 
 No local toolchain is required: the build runs inside the official devkitPro Docker image.
@@ -20,8 +42,9 @@ With devkitARM installed locally (`DEVKITARM` set), plain `make` works too.
 
 ## Running
 
-Any GBA emulator runs `lelion.gba`; [mGBA](https://mgba.io) is the reference here. On real
-hardware, copy the ROM to a flash cartridge.
+Download `lelion.gba` from the [releases](https://github.com/w3cdotorg/lelion-gba/releases) or build
+it. Any GBA emulator runs it; [mGBA](https://mgba.io) is the reference here. On real hardware,
+copy the ROM to a flash cartridge (SRAM save type).
 
 ## Project layout
 
@@ -29,7 +52,17 @@ hardware, copy the ROM to a flash cartridge.
 src/               C sources (game logic, rendering, audio)
 assets/            source art and music; assets/generated holds the C arrays produced by tools/
 tools/             Python converters (sprites, skylines, music) — no external dependencies
-tests/             headless emulator checks
+tests/             headless checks: harness.c (libmgba) runs the ROM, presses keys, reads memory, takes captures;
+                   scripts/*.txt are the scenarios, run.sh runs them all
 ```
+
+## Tests
+
+```sh
+tests/run.sh            # needs libmgba (brew install mgba / apt install libmgba-dev)
+```
+
+The game exposes a small debug block at `0x02030000` (lion position, camera, progress, lives,
+state...) that the scripts assert on; `cheat_win` in that block lets a test force a victory.
 
 See `PLAN.md` for the porting plan and progress.

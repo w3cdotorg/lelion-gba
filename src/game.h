@@ -58,6 +58,7 @@ typedef struct {
     u32 frame;         // frames since the level started (drives the spawner)
     u32 time;          // frames of actual play (the chrono)
     u32 arcade_time;   // frames accumulated over cleared arcade stages
+    int new_best;      // this level's time beat the saved record
 } Game;
 #define LIVES_MAX 3
 #define INVULN_FRAMES 90
@@ -108,5 +109,6 @@ typedef struct {
     u32 boss_state;             // +116
     s32 boss_x;                 // +120
     u32 arcade, stage;          // +124, +128
+    u32 new_best;               // +132
 } DebugState;
 #define DEBUG ((volatile DebugState *)0x02030000)

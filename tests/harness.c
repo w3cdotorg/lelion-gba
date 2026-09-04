@@ -95,8 +95,8 @@ int main(int argc, char **argv) {
             printf("shot %s (frame %u)\n", a1, frame);
         } else if (!strncmp(cmd, "peek", 4) || !strncmp(cmd, "expect", 6)) {
             int bits = atoi(cmd + (cmd[0] == 'p' ? 4 : 6));
-            int plage = !strcmp(cmd, "expect_range32");
-            if (plage) bits = 32;
+            int plage = !strncmp(cmd, "expect_range", 12);
+            if (plage) bits = atoi(cmd + 12);
             unsigned addr = lire_nombre(a1);
             unsigned v = bits == 8 ? core->busRead8(core, addr) : bits == 16 ? core->busRead16(core, addr) : core->busRead32(core, addr);
             if (cmd[0] == 'p') {

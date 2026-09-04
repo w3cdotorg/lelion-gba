@@ -3,6 +3,7 @@
 #include "text.h"
 #include "town.h"
 #include "audio.h"
+#include "save.h"
 
 const int DIFF_LIVES[NB_DIFFICULTIES] = { 3, 3, 1 };
 const int DIFF_WIN_PERMIL[NB_DIFFICULTIES] = { 850, 900, 950 };
@@ -29,6 +30,13 @@ void menu_draw_title(int row) {
     text_draw_centered_shadow(46, "PAINT THE TOWN, PUKE A RAINBOW", PAL_HUD_FG, 1);
     draw_choice(66, "DIFFICULTY", DIFF_NAMES[cfg.difficulty], row == 0);
     draw_choice(80, "LEVEL", level_names[cfg.level], row == 1);
+    {
+        u16 best = cfg.arcade ? records.best_arcade : records.best[cfg.difficulty][cfg.level];
+        if (best) {
+            text_draw_shadow(120, 60, "BEST", PAL_GREY, 1);
+            draw_time(150, 60, (u32)best * 60, PAL_GREY, 1);
+        }
+    }
     draw_choice(94, "MODE", cfg.arcade ? "ARCADE" : "SINGLE", row == 2);
     draw_choice(108, "SOUND", cfg.sound ? "ON" : "OFF", row == 3);
     text_draw_centered_shadow(126, "PRESS START", (game.frame / 30) & 1 ? PAL_HUD_FG : PAL_YELLOW, 1);
@@ -103,6 +111,7 @@ void menu_draw_summary(int won, int can_next) {
     ratio(buf, game.colors, NB_COLORS);
     text_draw(150, y, buf, PAL_HUD_FG, 1);
     if (won && game.hits == 0) text_draw_centered(y + 16, "FLAWLESS!", PAL_PAINT0 + 3, 1);
+    if (won && game.new_best) text_draw_shadow(48, 118, "NEW BEST!", PAL_YELLOW, 1);
     if (cfg.arcade) text_draw_centered_shadow(140, won ? "A: NEXT STAGE   START: MENU" : "A: RETRY   START: MENU", PAL_HUD_FG, 1);
     else text_draw_centered_shadow(140, can_next ? "R: NEXT   A: AGAIN   START: MENU" : "A: AGAIN   START: MENU", PAL_HUD_FG, 1);
 }

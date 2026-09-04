@@ -84,8 +84,8 @@ void boss_draw(int cam_x) {
     // Parts: {dx, dy, w, h, tile offset, shape/size attrs}
     static const struct { int dx, dy, w, tiles; u16 a0, a1; } parts[4] = {
         { 0, 0, 64, 0,   ATTR0_SQUARE, ATTR1_SIZE_64 },
-        { 64, 0, 32, 64, ATTR0_TALL,   ATTR1_SIZE_32 },
-        { 0, 64, 64, 96, ATTR0_WIDE,   ATTR1_SIZE_32 },
+        { 64, 0, 32, 64, ATTR0_TALL,   ATTR1_SIZE_64 },   // TALL + SIZE_64 = 32x64
+        { 0, 64, 64, 96, ATTR0_WIDE,   ATTR1_SIZE_64 },   // WIDE + SIZE_64 = 64x32
         { 64, 64, 32, 128, ATTR0_SQUARE, ATTR1_SIZE_32 },
     };
     for (int i = 0; i < 4; i++) {

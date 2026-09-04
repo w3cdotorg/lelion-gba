@@ -9,6 +9,7 @@
 #include "audio.h"
 #include "menu.h"
 #include "boss.h"
+#include "save.h"
 
 Game game;
 Config cfg = { 0, 0, 1, 0, 0 };
@@ -60,7 +61,7 @@ static void start_level(void) {
     actors_init();
     boss_init(cfg.level == BOSS_LEVEL);
     game.colors = 0; game.progress = 0; game.won = 0; game.over = 0;
-    game.hits = 0; game.frame = 0; game.time = 0;
+    game.hits = 0; game.frame = 0; game.time = 0; game.new_best = 0;
     game.win_permil = DIFF_WIN_PERMIL[cfg.difficulty];
     music_play(cfg.level == BOSS_LEVEL ? THEME_BOSS : THEME_TOWN, 0);
     state = ST_INTRO;
@@ -94,6 +95,7 @@ static void update_title(void) {
         else if (title_row == 2) cfg.arcade ^= 1;
         else { cfg.sound ^= 1; apply_sound(); }
         sfx_play(sfx_pickup, SFX_PICKUP_LEN);
+        save_store();
     }
     if (key_hit(KEY_START) || key_hit(KEY_A)) {
         if (cfg.arcade) { cfg.stage = 0; game.arcade_time = 0; }
@@ -114,6 +116,16 @@ static void update_play(void) {
     if (game.progress >= game.win_permil && !game.won) {
         game.won = 1;
         if (cfg.arcade) game.arcade_time += game.time;
+        // Records: seconds, 0 = none yet.
+        u16 secs = game.time / 60 ? game.time / 60 : 1;
+        u16 *best = &records.best[cfg.difficulty][cfg.level];
+        game.new_best = (*best == 0 || secs < *best);
+        if (game.new_best) *best = secs;
+        if (cfg.arcade && cfg.stage + 1 >= ARCADE_STAGES) {
+            u16 total = game.arcade_time / 60 ? game.arcade_time / 60 : 1;
+            if (records.best_arcade == 0 || total < records.best_arcade) records.best_arcade = total;
+        }
+        save_store();
         sfx_play(sfx_victoire, SFX_VICTOIRE_LEN);
         sfx_puke(0);
         state = ST_SUMMARY; state_timer = 0;
@@ -140,6 +152,8 @@ int main(void) {
     jet_init();
     actors_init();
     audio_init();
+    save_load();
+    apply_sound();
     draw_static((u16 *)vid_mem_front);
     draw_static((u16 *)vid_mem_back);
     go_title();
@@ -231,6 +245,7 @@ int main(void) {
         DEBUG->boss_x = boss_x;
         DEBUG->arcade = cfg.arcade;
         DEBUG->stage = cfg.stage;
+        DEBUG->new_best = game.new_best;
 
         vid_vsync();
         vid_flip();
