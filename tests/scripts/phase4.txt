@@ -1,10 +1,15 @@
 # +72 music_step, +76 intensity, +80 sfx_frames_left, +84 sound status (bit 7 master, bits 0-3 channels active)
+# boot on the title screen, press START, wait for the READY/VOMIT intro (150 frames)
 run 30
+keys START
+run 2
+keys
+run 160
 expect_range32 0x02030054 0x81 0x8F
 expect32 0x0203004C 0
 run 60
-# the sequencer advances: 60 frames = 4 eighth notes at 120 BPM
-expect_range32 0x02030048 3 8
+# the sequencer advances: intro (150 frames) + 60 frames = 14 eighth notes at 120 BPM
+expect_range32 0x02030048 12 16
 # collect the first pickup: the pickup sound is playing right after the pick-up
 run 10
 keys RIGHT

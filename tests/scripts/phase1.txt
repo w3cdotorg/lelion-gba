@@ -1,5 +1,10 @@
 # Debug block: 0x02030000 magic, +4 lion_x, +8 lion_y, +12 cam_x, +16 frame, +32 puking
+# boot on the title screen, press START, wait for the READY/VOMIT intro (150 frames)
 run 30
+keys START
+run 2
+keys
+run 160
 expect32 0x02030000 0x4C494F4E
 expect32 0x02030004 40
 expect32 0x0203000C 0
@@ -21,5 +26,5 @@ run 300
 expect32 0x02030004 448
 expect32 0x0203000C 240
 # the game loop must keep up with the 60 Hz vblank: frame counter (+16) close to the harness count
-expect_range32 0x02030010 500 540
+expect_range32 0x02030010 650 700
 shot p1_right_edge

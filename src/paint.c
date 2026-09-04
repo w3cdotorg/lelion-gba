@@ -9,7 +9,7 @@ EWRAM_DATA static u8 cell_painted[GRID_H][GRID_W];    // painted pixels per cell
 static int paintable_cells, painted_cells, scan_row;
 static const int SLICE = 2;                           // cell rows scanned per frame -> full pass in 9 frames
 
-void paint_init(void) {
+IWRAM_CODE void paint_init(void) {
     paintable_cells = painted_cells = 0;
     for (int cy = 0; cy < GRID_H; cy++)
         for (int cx = 0; cx < GRID_W; cx++) {

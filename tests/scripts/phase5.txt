@@ -1,0 +1,77 @@
+# +88 state (0 title,1 intro,2 play,3 pause,4 continue,5 summary), +92 continue count,
+# +100 difficulty, +104 level, +108 cheat_win (test hook), +28 lives, +36 won
+run 30
+expect32 0x02030058 0
+expect32 0x02030064 0
+# title: RIGHT twice on the difficulty row -> HARD ; DOWN then RIGHT -> level 1
+keys RIGHT
+run 4
+keys
+run 4
+keys RIGHT
+run 4
+keys
+run 4
+expect32 0x02030064 2
+keys DOWN
+run 4
+keys
+run 4
+keys RIGHT
+run 4
+keys
+run 4
+expect32 0x02030068 1
+shot p5_title
+# START: level init (~20 frames) then the 150-frame intro
+keys START
+run 4
+keys
+run 40
+expect32 0x02030058 1
+run 90
+shot p5_intro_vomit
+run 65
+expect32 0x02030058 2
+expect32 0x0203001C 1
+# pause and resume
+keys START
+run 4
+keys
+run 5
+expect32 0x02030058 3
+shot p5_pause
+keys START
+run 4
+keys
+run 5
+expect32 0x02030058 2
+# hard mode: the first saucer hit ends the game -> CONTINUE? countdown
+run 280
+expect32 0x02030058 4
+expect_range32 0x0203005C 8 9
+shot p5_continue
+run 65
+expect_range32 0x0203005C 7 8
+# A restarts the level (intro again, one life)
+keys A
+run 4
+keys
+run 40
+expect32 0x02030058 1
+expect32 0x0203001C 1
+run 160
+expect32 0x02030058 2
+# forced win through the test hook -> summary, won; R goes to the next level
+poke32 0x0203006C 1
+run 5
+expect32 0x02030058 5
+expect32 0x02030024 1
+shot p5_summary
+poke32 0x0203006C 0
+keys R
+run 4
+keys
+run 40
+expect32 0x02030068 2
+expect32 0x02030058 1

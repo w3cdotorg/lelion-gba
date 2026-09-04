@@ -8,6 +8,8 @@
 #define TILE_SAUCER   (512 + 40)
 #define TILE_LADYBUG  (TILE_SAUCER + 8)
 #define TILE_PICKUP0  (TILE_LADYBUG + 4)        // 7 coloured 16x16 discs, 4 tiles each
+#define TILE_HEART    (TILE_PICKUP0 + 28)
+#define HEART_EVERY   1200                       // 20 s, easy only, when a heart is missing
 
 #define FIRST_PICKUP_FRAME  60
 #define PICKUP_DELAY        360                  // 6 s after unlocking a colour
@@ -15,7 +17,7 @@
 #define LADYBUG_FIRST       420
 
 Actor actors[MAX_ACTORS];
-static int next_pickup_frame, next_saucer_frame, next_ladybug_frame;
+static int next_pickup_frame, next_saucer_frame, next_ladybug_frame, next_heart_frame;
 
 static Actor *libre(void) {
     for (int i = 0; i < MAX_ACTORS; i++) if (actors[i].type == ACTOR_NONE) return &actors[i];
@@ -24,7 +26,7 @@ static Actor *libre(void) {
 
 // 0..1000: how far along the town is, drives enemy pace like the Godot version.
 static int difficulty(void) {
-    int d = game.progress * 1000 / WIN_PERMIL;
+    int d = game.progress * 1000 / game.win_permil;
     return d > 1000 ? 1000 : d;
 }
 static int interval(int start, int end) {   // frames, shrinking with difficulty, +-20 % jitter
@@ -50,8 +52,31 @@ static void spawn_ladybug(void) {
     a->w = a->h = 16; a->param = rnd() % 256; a->age = 0;
 }
 
+static void spawn_heart(void) {
+    Actor *a = libre(); if (!a) return;
+    a->type = ACTOR_HEART; a->x = FIX(40 + rnd() % (TOWN_W - 80)); a->y = FIX(HUD_H + 8 + rnd() % 60);
+    a->vx = 0; a->w = a->h = 16; a->age = 0;
+}
+
 void actors_init(void) {
     for (int i = 0; i < MAX_ACTORS; i++) actors[i].type = ACTOR_NONE;
+    // 16x16 heart in palette bank 1, colour 1 (red): implicit heart curve, 4 tiles.
+    for (int t = 0; t < 4; t++) {
+        u32 *tile = (u32 *)&tile_mem_obj[0][TILE_HEART + t];
+        int ox = (t & 1) * 8, oy = (t >> 1) * 8;
+        for (int y = 0; y < 8; y++) {
+            u32 row = 0;
+            for (int x = 0; x < 8; x++) {
+                // heart: (px^2 + py^2 - 1)^3 - px^2 py^3 <= 0, scaled to 16 px, in 1/16 units
+                int px = (ox + x) * 2 - 15, py = 12 - (oy + y) * 2;   // px,py in -15..15 (units of 1/6)
+                long a2 = px * px + py * py - 36;                  // (px^2+py^2 - 1) in units of 36
+                long lhs = a2 * a2 * a2;                          // *36^3
+                long rhs = (long)px * px * py * py * py * 36;     // px^2 py^3 * 36  (scale to match)
+                if (lhs - rhs <= 0) row |= 1u << (4 * x);
+            }
+            tile[y] = row;
+        }
+    }
     memcpy16(&tile_mem_obj[0][TILE_SAUCER], saucer_tiles, sizeof saucer_tiles / 2);
     memcpy16(&tile_mem_obj[0][TILE_LADYBUG], ladybug_tiles, sizeof ladybug_tiles / 2);
     // 16x16 disc per colour, palette bank 1 (rainbow), 4 tiles in 1D order.
@@ -72,6 +97,7 @@ void actors_init(void) {
     next_pickup_frame = FIRST_PICKUP_FRAME;
     next_saucer_frame = SAUCER_FIRST;
     next_ladybug_frame = LADYBUG_FIRST;
+    next_heart_frame = HEART_EVERY;
 }
 
 static int overlaps(const Actor *a, int lx, int ly, int lw, int lh) {
@@ -89,6 +115,10 @@ void actors_update(void) {
     }
     if ((int)f >= next_saucer_frame) { spawn_saucer(); next_saucer_frame = f + interval(360, 150); }
     if ((int)f >= next_ladybug_frame) { spawn_ladybug(); next_ladybug_frame = f + interval(480, 180); }
+    if ((int)f >= next_heart_frame) {
+        if (cfg.difficulty == 0 && game.lives < DIFF_LIVES[0] && actors_count(ACTOR_HEART) == 0) spawn_heart();
+        next_heart_frame = f + HEART_EVERY;
+    }
 
     // Lion hitbox: the 32x32 sprite shrunk by 4 px on each side.
     int lx = UNFIX(lion.x) + 4, ly = UNFIX(lion.y) + 4, lw = 24, lh = 24;
@@ -117,6 +147,10 @@ void actors_update(void) {
             sfx_play(sfx_pickup, SFX_PICKUP_LEN);
             a->type = ACTOR_NONE;
             next_pickup_frame = f + PICKUP_DELAY;
+        } else if (a->type == ACTOR_HEART) {
+            if (game.lives < DIFF_LIVES[cfg.difficulty]) game.lives++;
+            sfx_play(sfx_pickup, SFX_PICKUP_LEN);
+            a->type = ACTOR_NONE;
         } else if (game.invuln == 0) {
             lion_hit(UNFIX(a->x) + a->w / 2);
         }
@@ -142,6 +176,10 @@ void actors_draw(int cam_x) {
         case ACTOR_LADYBUG:
             obj_set_attr(o, ATTR0_SQUARE | ATTR0_4BPP | ATTR0_Y(sy & 0xFF), ATTR1_SIZE_16 | ATTR1_X(sx & 0x1FF),
                          ATTR2_PALBANK(0) | ATTR2_ID(TILE_LADYBUG));
+            break;
+        case ACTOR_HEART:
+            obj_set_attr(o, ATTR0_SQUARE | ATTR0_4BPP | ATTR0_Y(sy & 0xFF), ATTR1_SIZE_16 | ATTR1_X(sx & 0x1FF),
+                         ATTR2_PALBANK(1) | ATTR2_ID(TILE_HEART));
             break;
         default: obj_hide(o);
         }

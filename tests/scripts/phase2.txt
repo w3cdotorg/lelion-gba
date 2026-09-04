@@ -1,5 +1,10 @@
 # Debug block: +20 progress (permil), +24 colors, +36 won
+# boot on the title screen, press START, wait for the READY/VOMIT intro (150 frames)
 run 30
+keys START
+run 2
+keys
+run 160
 expect32 0x02030018 0
 expect32 0x02030014 0
 # first pickup appears at (120, 60) one game-second in (init takes ~16 frames): walk into it

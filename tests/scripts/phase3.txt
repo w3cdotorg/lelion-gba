@@ -1,9 +1,14 @@
 # +28 lives, +44 n_enemies, +56 invuln, +60 enemy_x, +64 enemy_y, +68 over
+# boot on the title screen, press START, wait for the READY/VOMIT intro (150 frames)
 run 30
+keys START
+run 2
+keys
+run 160
 expect32 0x0203001C 3
 expect32 0x0203002C 0
-# the saucer shows up at 3 s (game time), at y = 61: the lion waits at (40, 60) and gets hit
-run 190
+# the saucer shows up at 3 s of play, at y = 61: the lion waits at (40, 60) and gets hit
+run 185
 expect_range32 0x0203002C 1 2
 expect32 0x02030040 61
 run 110

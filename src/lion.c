@@ -25,7 +25,7 @@ void lion_init(void) {
     lion.facing = 1;
     lion.puking = 0;
     lion.kx = 0;
-    game.lives = LIVES_MAX;
+    game.lives = DIFF_LIVES[cfg.difficulty];
     game.invuln = 0;
     memcpy16(&tile_mem_obj[0][TILE_IDLE], lion_idle_tiles, sizeof lion_idle_tiles / 2);
     memcpy16(&tile_mem_obj[0][TILE_PUKE], lion_puke_tiles, sizeof lion_puke_tiles / 2);
@@ -46,6 +46,7 @@ void lion_update(void) {
 
 void lion_hit(int from_world_x) {
     game.lives--;
+    game.hits++;
     game.invuln = INVULN_FRAMES;
     sfx_play(sfx_mort, SFX_MORT_LEN);
     lion.kx = (UNFIX(lion.x) + 16 < from_world_x) ? -FIX(4) : FIX(4);

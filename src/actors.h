@@ -1,7 +1,7 @@
 #pragma once
 #include "game.h"
 
-typedef enum { ACTOR_NONE, ACTOR_PICKUP, ACTOR_SAUCER, ACTOR_LADYBUG } ActorType;
+typedef enum { ACTOR_NONE, ACTOR_PICKUP, ACTOR_SAUCER, ACTOR_LADYBUG, ACTOR_HEART } ActorType;
 
 typedef struct {
     ActorType type;

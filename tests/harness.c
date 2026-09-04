@@ -112,6 +112,11 @@ int main(int argc, char **argv) {
                 printf("%s expect 0x%08X == %u : %u (frame %u)\n", ok ? "OK  " : "FAIL", addr, attendu, v, frame);
                 if (!ok) echecs++;
             }
+        } else if (!strncmp(cmd, "poke", 4)) {
+            int bits = atoi(cmd + 4);
+            unsigned addr = lire_nombre(a1), v = lire_nombre(a2);
+            if (bits == 8) core->busWrite8(core, addr, v); else if (bits == 16) core->busWrite16(core, addr, v); else core->busWrite32(core, addr, v);
+            printf("poke 0x%08X <- %u\n", addr, v);
         } else if (!strcmp(cmd, "pixel")) {
             unsigned x = lire_nombre(a1), y = lire_nombre(a2);
             color_t c = tampon[y * largeur + x];

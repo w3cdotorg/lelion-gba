@@ -16,6 +16,9 @@
 #define PAL_PAINT0    2          // 7 rainbow colours: 2..8
 #define PAL_HUD_BG    9
 #define PAL_HUD_FG    10
+#define PAL_GREY      11
+#define PAL_YELLOW    (PAL_PAINT0 + 2)
+#define PAL_RED       (PAL_PAINT0 + 0)
 #define PAL_SKY0      240        // 16 sky shades: 240..255
 
 #define NB_COLORS 7
@@ -24,7 +27,19 @@ extern const u16 RAINBOW[NB_COLORS];
 #define CELL      4                       // coverage grid cell size in pixels
 #define GRID_W    (TOWN_W / CELL)
 #define GRID_H    (TOWN_H / CELL)
-#define WIN_PERMIL 850                    // 85 % of paintable cells
+#define NB_DIFFICULTIES 3
+
+typedef enum { ST_TITLE, ST_INTRO, ST_PLAY, ST_PAUSE, ST_CONTINUE, ST_SUMMARY } State;
+
+typedef struct {
+    int difficulty;    // 0 easy (3 lives, hearts respawn, 85 %), 1 normal (3, 90 %), 2 hard (1 life, 95 %)
+    int level;         // 0..NB_LEVELS-1
+    int sound;
+} Config;
+extern Config cfg;
+extern const int DIFF_LIVES[NB_DIFFICULTIES];
+extern const int DIFF_WIN_PERMIL[NB_DIFFICULTIES];
+extern const char *const DIFF_NAMES[NB_DIFFICULTIES];
 
 // Global game state.
 typedef struct {
@@ -33,8 +48,11 @@ typedef struct {
     int won;
     int over;          // no lives left
     int lives;
+    int hits;          // hearts lost this level
     int invuln;        // frames of invulnerability left after a hit
-    u32 frame;
+    int win_permil;    // threshold for the current difficulty
+    u32 frame;         // frames since the level started (drives the spawner)
+    u32 time;          // frames of actual play (the chrono)
 } Game;
 #define LIVES_MAX 3
 #define INVULN_FRAMES 90
@@ -76,5 +94,11 @@ typedef struct {
     u32 music_intensity;        // +76
     u32 sfx_frames_left;        // +80
     u32 sound_on;               // +84  REG_SNDSTAT master enable
+    u32 state;                  // +88
+    u32 continue_count;         // +92
+    u32 time;                   // +96  play frames
+    u32 difficulty, level;      // +100, +104
+    u32 cheat_win;              // +108 written by the test harness: forces a win
+    u32 hits;                   // +112
 } DebugState;
 #define DEBUG ((volatile DebugState *)0x02030000)
