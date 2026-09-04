@@ -29,13 +29,20 @@ void menu_draw_title(int row) {
     text_draw_centered_shadow(46, "PAINT THE TOWN, PUKE A RAINBOW", PAL_HUD_FG, 1);
     draw_choice(66, "DIFFICULTY", DIFF_NAMES[cfg.difficulty], row == 0);
     draw_choice(80, "LEVEL", level_names[cfg.level], row == 1);
-    draw_choice(94, "SOUND", cfg.sound ? "ON" : "OFF", row == 2);
-    text_draw_centered_shadow(116, "PRESS START", (game.frame / 30) & 1 ? PAL_HUD_FG : PAL_YELLOW, 1);
-    text_draw_centered_shadow(140, "A: PUKE   START: PAUSE", PAL_HUD_FG, 1);
+    draw_choice(94, "MODE", cfg.arcade ? "ARCADE" : "SINGLE", row == 2);
+    draw_choice(108, "SOUND", cfg.sound ? "ON" : "OFF", row == 3);
+    text_draw_centered_shadow(126, "PRESS START", (game.frame / 30) & 1 ? PAL_HUD_FG : PAL_YELLOW, 1);
+    text_draw_centered_shadow(144, "A: PUKE   START: PAUSE", PAL_HUD_FG, 1);
 }
 
 void menu_draw_intro(int timer) {
-    if (timer < 60) text_draw_centered_shadow(70, level_names[cfg.level], PAL_YELLOW, 2);
+    if (timer < 60) {
+        if (cfg.arcade) {
+            char buf[12] = "STAGE 1/9";
+            buf[6] = '1' + cfg.stage;
+            text_draw_centered_shadow(70, buf, PAL_YELLOW, 2);
+        } else text_draw_centered_shadow(70, level_names[cfg.level], PAL_YELLOW, 2);
+    }
     else if (timer < 105) text_draw_centered_shadow(70, "READY?", PAL_YELLOW, 2);
     else text_draw_centered_shadow(66, "VOMIT!", PAL_YELLOW, 3);
 }
@@ -62,9 +69,23 @@ static void ratio(char *buf, int a, int b) {   // "a/b" for small numbers
     buf[i++] = '0' + b % 10; buf[i] = 0;
 }
 
+void menu_draw_arcade_end(void) {
+    panel_render(48, 128);
+    text_draw_centered_shadow(22, "ARCADE CLEARED!", PAL_YELLOW, 2);
+    text_draw(48, 60, "TOTAL TIME", PAL_GREY, 1);
+    draw_time(150, 60, game.arcade_time, PAL_HUD_FG, 1);
+    text_draw(48, 72, "LAST STAGE", PAL_GREY, 1);
+    draw_time(150, 72, game.time, PAL_HUD_FG, 1);
+    text_draw_centered_shadow(140, "START: MENU", PAL_HUD_FG, 1);
+}
+
 void menu_draw_summary(int won, int can_next) {
     panel_render(48, 128);
-    text_draw_centered_shadow(22, won ? "VICTORY!" : "GAME OVER", won ? PAL_YELLOW : PAL_RED, 2);
+    if (cfg.arcade && won) {
+        char buf[16] = "STAGE 1/9 CLEAR";
+        buf[6] = '1' + cfg.stage;
+        text_draw_centered_shadow(22, buf, PAL_YELLOW, 2);
+    } else text_draw_centered_shadow(22, won ? "VICTORY!" : "GAME OVER", won ? PAL_YELLOW : PAL_RED, 2);
     int y = 54;
     char buf[8];
     text_draw(48, y, "PAINTED", PAL_GREY, 1);
@@ -82,5 +103,6 @@ void menu_draw_summary(int won, int can_next) {
     ratio(buf, game.colors, NB_COLORS);
     text_draw(150, y, buf, PAL_HUD_FG, 1);
     if (won && game.hits == 0) text_draw_centered(y + 16, "FLAWLESS!", PAL_PAINT0 + 3, 1);
-    text_draw_centered_shadow(140, can_next ? "R: NEXT   A: AGAIN   START: MENU" : "A: AGAIN   START: MENU", PAL_HUD_FG, 1);
+    if (cfg.arcade) text_draw_centered_shadow(140, won ? "A: NEXT STAGE   START: MENU" : "A: RETRY   START: MENU", PAL_HUD_FG, 1);
+    else text_draw_centered_shadow(140, can_next ? "R: NEXT   A: AGAIN   START: MENU" : "A: AGAIN   START: MENU", PAL_HUD_FG, 1);
 }

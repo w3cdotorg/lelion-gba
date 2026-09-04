@@ -1,0 +1,40 @@
+# +116 boss_state (0 off,1 rest,2 announce,3 enter,4 pause,5 leave), +120 boss_x, +28 lives
+# Village (level 2) has the boss: title DOWN, RIGHT x2 (level 2), START
+run 30
+keys DOWN
+run 4
+keys
+run 4
+keys RIGHT
+run 4
+keys
+run 4
+keys RIGHT
+run 4
+keys
+run 4
+expect32 0x02030068 2
+keys START
+run 4
+keys
+run 40
+expect32 0x02030074 1
+run 150
+expect32 0x02030058 2
+# rest ~90 frames, announce 60, then it walks from its side to the centre (x = 192)
+run 130
+expect_range32 0x02030074 2 3
+run 80
+expect32 0x02030074 3
+shot p6_boss
+# the lion stays put at (40, 60): the boss coming from the left walks over it -> one hit (invulnerability)
+run 150
+expect32 0x02030074 4
+expect32 0x02030078 192
+expect32 0x0203001C 2
+shot p6_boss_hit
+# it leaves (second pass over the lion), rests, and comes back from the other side
+run 300
+expect_range32 0x02030074 1 3
+expect32 0x0203001C 1
+expect32 0x02030058 2

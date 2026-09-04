@@ -24,5 +24,5 @@ Target: the same game as the Godot version, on a 240×160 screen.
 - [x] 3. Pickups and enemies: color dots, saucer, ladybug, hearts, invulnerability
 - [x] 4. Sound: sequencer on GB channels, town theme, effects
 - [x] 5. Menus: title, difficulty, level, settings, READY? VOMIT!, CONTINUE?, summary
-- [ ] 6. Boss level and arcade mode
+- [x] 6. Boss level and arcade mode
 - [ ] 7. SRAM saves, CI release, ROM playable on the website

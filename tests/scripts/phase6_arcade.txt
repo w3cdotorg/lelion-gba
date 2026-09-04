@@ -1,0 +1,61 @@
+# +124 arcade, +128 stage, +100 difficulty, +104 level, +88 state, +108 cheat_win
+# title: DOWN x2 -> MODE row, RIGHT -> ARCADE, START -> stage 1 (easy, skyline)
+run 30
+keys DOWN
+run 4
+keys
+run 4
+keys DOWN
+run 4
+keys
+run 4
+keys RIGHT
+run 4
+keys
+run 4
+expect32 0x0203007C 1
+keys START
+run 4
+keys
+run 40
+expect32 0x02030080 0
+expect32 0x02030064 0
+expect32 0x02030068 0
+expect32 0x02030058 1
+run 160
+expect32 0x02030058 2
+poke32 0x0203006C 1
+run 5
+expect32 0x02030058 5
+poke32 0x0203006C 0
+shot p6_arcade_clear
+# A -> stage 2 = level 1 (metropolis), still easy
+keys A
+run 4
+keys
+run 40
+expect32 0x02030080 1
+expect32 0x02030068 1
+expect32 0x02030064 0
+expect32 0x02030058 1
+# stages 4-6 are normal, 7-9 hard: jump ahead by winning repeatedly
+run 160
+poke32 0x0203006C 1
+run 5
+poke32 0x0203006C 0
+keys A
+run 4
+keys
+run 40
+expect32 0x02030080 2
+run 160
+poke32 0x0203006C 1
+run 5
+poke32 0x0203006C 0
+keys A
+run 4
+keys
+run 40
+expect32 0x02030080 3
+expect32 0x02030064 1
+expect32 0x02030068 0

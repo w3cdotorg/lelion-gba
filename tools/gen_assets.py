@@ -211,6 +211,56 @@ SKYLINES = [
 ]
 
 
+# ---------------------------------------------------------------- boss
+BOSS_CANVAS, BOSS_H = 96, 88
+
+
+def boss_sprite():
+    """Silhouette painter: flood-fill the white background away, crop, fit into a 96x96 canvas
+    (88 px tall, bottom-aligned), 3 colours: 1 black, 2 white (eye), 3 red (brush tip)."""
+    w, h, px = lire_png(ASSETS / "boss_peintre.png")
+    fond = [[False] * w for _ in range(h)]
+    pile = [(x, y) for x in range(w) for y in (0, h - 1)] + [(x, y) for y in range(h) for x in (0, w - 1)]
+    while pile:
+        x, y = pile.pop()
+        if x < 0 or y < 0 or x >= w or y >= h or fond[y][x]:
+            continue
+        r, g, b, a = px[y][x]
+        if a < 128 or r + g + b < 3 * 200:
+            continue
+        fond[y][x] = True
+        pile += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+    xs = [x for y in range(h) for x in range(w) if not fond[y][x]]
+    ys = [y for y in range(h) for x in range(w) if not fond[y][x]]
+    x0, x1, y0, y1 = min(xs), max(xs) + 1, min(ys), max(ys) + 1
+    img = [[(0, 0, 0, 0) if fond[y][x] else px[y][x] for x in range(x0, x1)] for y in range(y0, y1)]
+    cw, ch = x1 - x0, y1 - y0
+    tw = min(BOSS_CANVAS, round(cw * BOSS_H / ch))
+    petit = reduire(img, cw, ch, tw, BOSS_H)
+    carte = [[0] * BOSS_CANVAS for _ in range(BOSS_CANVAS)]
+    ox, oy = (BOSS_CANVAS - tw) // 2, BOSS_CANVAS - BOSS_H
+    for y in range(BOSS_H):
+        for x in range(tw):
+            r, g, b, a = petit[y][x]
+            if a < 128:
+                continue
+            if r > 150 and g < 110:
+                carte[oy + y][ox + x] = 3
+            elif r + g + b > 3 * 128:
+                carte[oy + y][ox + x] = 2
+            else:
+                carte[oy + y][ox + x] = 1
+    # four OBJ parts in 1D tile order: TL 64x64, TR 32x64, BL 64x32, BR 32x32
+    def part(px0, py0, pw, ph):
+        sub = [row[px0:px0 + pw] for row in carte[py0:py0 + ph]]
+        return tuiles_4bpp(sub, pw, ph)
+    data = part(0, 0, 64, 64) + part(64, 0, 32, 64) + part(0, 64, 64, 32) + part(64, 64, 32, 32)
+    # collision box of the silhouette in canvas pixels
+    cols = [x for y in range(BOSS_CANVAS) for x in range(BOSS_CANVAS) if carte[y][x]]
+    rows = [y for y in range(BOSS_CANVAS) for x in range(BOSS_CANVAS) if carte[y][x]]
+    return data, (min(cols), min(rows), max(cols) + 1, max(rows) + 1)
+
+
 # ---------------------------------------------------------------- C emit
 def c_array(nom, octets, type_c="const unsigned char", par_ligne=24):
     lignes = [f"{type_c} {nom}[{len(octets)}] __attribute__((aligned(4))) = {{"]
@@ -246,6 +296,14 @@ def main():
         hdr.append(f"extern const unsigned char {cle}_tiles[{len(data)}];  // {tw}x{th}, 4bpp, {tw // 8 * th // 8} tiles")
         hdr.append(f"#define {cle.upper()}_W {tw}")
         hdr.append(f"#define {cle.upper()}_H {th}")
+    boss_data, (bx0, by0, bx1, by1) = boss_sprite()
+    c.append(c_array("boss_tiles", boss_data))
+    c.append("const unsigned short boss_pal[16] __attribute__((aligned(4))) = {0, 0x0000, 0x7FFF, 0x001F, " + ", ".join(["0"] * 12) + "};")
+    hdr += [f"extern const unsigned char boss_tiles[{len(boss_data)}];  // 96x96 canvas in 4 OBJ parts (TL 64x64, TR 32x64, BL 64x32, BR 32x32)",
+            "extern const unsigned short boss_pal[16];",
+            f"#define BOSS_CANVAS {BOSS_CANVAS}", f"#define BOSS_H {BOSS_H}",
+            f"#define BOSS_BOX_X0 {bx0}", f"#define BOSS_BOX_Y0 {by0}", f"#define BOSS_BOX_X1 {bx1}", f"#define BOSS_BOX_Y1 {by1}"]
+    print(f"boss: {len(boss_data)} bytes, box {bx0},{by0}-{bx1},{by1}")
     (SORTIE / "sprites.c").write_text("\n".join(c) + "\n")
     (SORTIE / "sprites.h").write_text("\n".join(hdr) + "\n")
 

@@ -35,7 +35,11 @@ typedef struct {
     int difficulty;    // 0 easy (3 lives, hearts respawn, 85 %), 1 normal (3, 90 %), 2 hard (1 life, 95 %)
     int level;         // 0..NB_LEVELS-1
     int sound;
+    int arcade;        // 1 = arcade mode: the 9 stages in a row (levels x difficulties)
+    int stage;         // arcade stage 0..8
 } Config;
+#define ARCADE_STAGES 9
+#define BOSS_LEVEL 2   // the village has the painter
 extern Config cfg;
 extern const int DIFF_LIVES[NB_DIFFICULTIES];
 extern const int DIFF_WIN_PERMIL[NB_DIFFICULTIES];
@@ -53,6 +57,7 @@ typedef struct {
     int win_permil;    // threshold for the current difficulty
     u32 frame;         // frames since the level started (drives the spawner)
     u32 time;          // frames of actual play (the chrono)
+    u32 arcade_time;   // frames accumulated over cleared arcade stages
 } Game;
 #define LIVES_MAX 3
 #define INVULN_FRAMES 90
@@ -100,5 +105,8 @@ typedef struct {
     u32 difficulty, level;      // +100, +104
     u32 cheat_win;              // +108 written by the test harness: forces a win
     u32 hits;                   // +112
+    u32 boss_state;             // +116
+    s32 boss_x;                 // +120
+    u32 arcade, stage;          // +124, +128
 } DebugState;
 #define DEBUG ((volatile DebugState *)0x02030000)

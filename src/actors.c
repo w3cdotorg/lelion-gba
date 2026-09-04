@@ -31,6 +31,7 @@ static int difficulty(void) {
 }
 static int interval(int start, int end) {   // frames, shrinking with difficulty, +-20 % jitter
     int base = start + (end - start) * difficulty() / 1000;
+    if (cfg.level == BOSS_LEVEL) base *= 2;    // the painter is threat enough
     return base * (80 + rnd() % 41) / 100;
 }
 

@@ -14,3 +14,11 @@ extern const unsigned char saucer_tiles[256];  // 32x16, 4bpp, 8 tiles
 extern const unsigned char ladybug_tiles[128];  // 16x16, 4bpp, 4 tiles
 #define LADYBUG_W 16
 #define LADYBUG_H 16
+extern const unsigned char boss_tiles[4608];  // 96x96 canvas in 4 OBJ parts (TL 64x64, TR 32x64, BL 64x32, BR 32x32)
+extern const unsigned short boss_pal[16];
+#define BOSS_CANVAS 96
+#define BOSS_H 88
+#define BOSS_BOX_X0 0
+#define BOSS_BOX_Y0 8
+#define BOSS_BOX_X1 95
+#define BOSS_BOX_Y1 96

@@ -8,9 +8,10 @@
 #include "actors.h"
 #include "audio.h"
 #include "menu.h"
+#include "boss.h"
 
 Game game;
-Config cfg = { 0, 0, 1 };
+Config cfg = { 0, 0, 1, 0, 0 };
 u32 rnd_seed = 0x1E51ABCD;
 const u16 RAINBOW[NB_COLORS] = {
     RGB15C(31, 0, 0), RGB15C(31, 16, 0), RGB15C(31, 31, 0), RGB15C(0, 31, 0),
@@ -45,22 +46,31 @@ static void hide_all_sprites(void) {
     for (int i = 0; i < 128; i++) obj_hide(&oam_mem[i]);
 }
 
+static void apply_arcade_stage(void) {
+    cfg.difficulty = cfg.stage / NB_LEVELS;
+    cfg.level = cfg.stage % NB_LEVELS;
+}
+
 static void start_level(void) {
+    if (cfg.arcade) apply_arcade_stage();
     town_init(cfg.level);
     paint_init();
     lion_init();
     jet_init();
     actors_init();
+    boss_init(cfg.level == BOSS_LEVEL);
     game.colors = 0; game.progress = 0; game.won = 0; game.over = 0;
     game.hits = 0; game.frame = 0; game.time = 0;
     game.win_permil = DIFF_WIN_PERMIL[cfg.difficulty];
-    music_play(THEME_TOWN, 0);
+    music_play(cfg.level == BOSS_LEVEL ? THEME_BOSS : THEME_TOWN, 0);
     state = ST_INTRO;
     state_timer = 0;
 }
 
 static void go_title(void) {
+    if (cfg.arcade) cfg.level = 0;
     town_init(cfg.level);
+    boss_init(0);
     hide_all_sprites();
     music_play(THEME_TOWN, 1);
     state = ST_TITLE;
@@ -75,22 +85,27 @@ static void apply_sound(void) {
 }
 
 static void update_title(void) {
-    if (key_hit(KEY_UP)) title_row = (title_row + 2) % 3;
-    if (key_hit(KEY_DOWN)) title_row = (title_row + 1) % 3;
+    if (key_hit(KEY_UP)) title_row = (title_row + 3) % 4;
+    if (key_hit(KEY_DOWN)) title_row = (title_row + 1) % 4;
     int d = key_hit(KEY_RIGHT) - key_hit(KEY_LEFT);
     if (d) {
         if (title_row == 0) cfg.difficulty = (cfg.difficulty + d + NB_DIFFICULTIES) % NB_DIFFICULTIES;
         else if (title_row == 1) { cfg.level = (cfg.level + d + NB_LEVELS) % NB_LEVELS; town_init(cfg.level); }
+        else if (title_row == 2) cfg.arcade ^= 1;
         else { cfg.sound ^= 1; apply_sound(); }
         sfx_play(sfx_pickup, SFX_PICKUP_LEN);
     }
-    if (key_hit(KEY_START) || key_hit(KEY_A)) start_level();
+    if (key_hit(KEY_START) || key_hit(KEY_A)) {
+        if (cfg.arcade) { cfg.stage = 0; game.arcade_time = 0; }
+        start_level();
+    }
 }
 
 static void update_play(void) {
     if (key_hit(KEY_START)) { state = ST_PAUSE; return; }
     lion_update();
     actors_update();
+    boss_update();
     int cam = camera_x();
     jet_update(cam);
     paint_scan_step();
@@ -98,6 +113,7 @@ static void update_play(void) {
     if (DEBUG->cheat_win) game.progress = 1000;
     if (game.progress >= game.win_permil && !game.won) {
         game.won = 1;
+        if (cfg.arcade) game.arcade_time += game.time;
         sfx_play(sfx_victoire, SFX_VICTOIRE_LEN);
         sfx_puke(0);
         state = ST_SUMMARY; state_timer = 0;
@@ -152,9 +168,11 @@ int main(void) {
             if (++state_timer >= 60) { state_timer = 0; if (--continue_count < 0) { continue_count = 0; state = ST_SUMMARY; hide_all_sprites(); } }
             break;
         case ST_SUMMARY: {
-            int can_next = game.won && cfg.level + 1 < NB_LEVELS;
-            if (key_hit(KEY_A)) start_level();
-            else if (key_hit(KEY_START)) go_title();
+            int arcade_done = cfg.arcade && game.won && cfg.stage + 1 >= ARCADE_STAGES;
+            int can_next = !cfg.arcade && game.won && cfg.level + 1 < NB_LEVELS;
+            if (key_hit(KEY_START)) go_title();
+            else if (arcade_done) break;
+            else if (key_hit(KEY_A)) { if (cfg.arcade && game.won) cfg.stage++; start_level(); }
             else if (can_next && key_hit(KEY_R)) { cfg.level++; start_level(); }
             break;
         }
@@ -167,11 +185,15 @@ int main(void) {
         town_render(cam);
         switch (state) {
         case ST_TITLE:   menu_draw_title(title_row); break;
-        case ST_SUMMARY: menu_draw_summary(game.won, game.won && cfg.level + 1 < NB_LEVELS); break;
+        case ST_SUMMARY:
+            if (cfg.arcade && game.won && cfg.stage + 1 >= ARCADE_STAGES) menu_draw_arcade_end();
+            else menu_draw_summary(game.won, !cfg.arcade && game.won && cfg.level + 1 < NB_LEVELS);
+            break;
         default:
             hud_draw();
             lion_draw(cam);
             actors_draw(cam);
+            boss_draw(cam);
             if (state == ST_INTRO) menu_draw_intro(state_timer);
             else if (state == ST_PAUSE) menu_draw_pause();
             else if (state == ST_CONTINUE) menu_draw_continue(continue_count);
@@ -205,6 +227,10 @@ int main(void) {
         DEBUG->difficulty = cfg.difficulty;
         DEBUG->level = cfg.level;
         DEBUG->hits = game.hits;
+        DEBUG->boss_state = boss_state;
+        DEBUG->boss_x = boss_x;
+        DEBUG->arcade = cfg.arcade;
+        DEBUG->stage = cfg.stage;
 
         vid_vsync();
         vid_flip();
