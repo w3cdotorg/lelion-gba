@@ -5,6 +5,7 @@
 #include "paint.h"
 #include "jet.h"
 #include "hud.h"
+#include "actors.h"
 
 Game game;
 u32 rnd_seed = 0x1E51ABCD;
@@ -43,7 +44,8 @@ int main(void) {
     paint_init();
     lion_init();
     jet_init();
-    game.colors = 1;   // TODO phase 3: start at 0, unlock through pickups
+    actors_init();
+    game.colors = 0;
     draw_static((u16 *)vid_mem_front);
     draw_static((u16 *)vid_mem_back);
 
@@ -51,7 +53,9 @@ int main(void) {
     u32 frame = 0;
     while (1) {
         key_poll();
+        game.frame = frame;
         lion_update();
+        actors_update();
         int cam = camera_x();
 
         jet_update(cam);
@@ -62,6 +66,7 @@ int main(void) {
         town_render(cam);
         hud_draw();
         lion_draw(cam);
+        actors_draw(cam);
 
         DEBUG->lion_x = UNFIX(lion.x);
         DEBUG->lion_y = UNFIX(lion.y);
@@ -71,6 +76,15 @@ int main(void) {
         DEBUG->progress = game.progress;
         DEBUG->colors = game.colors;
         DEBUG->won = game.won;
+        DEBUG->lives = game.lives;
+        DEBUG->invuln = game.invuln;
+        DEBUG->over = game.over;
+        DEBUG->n_pickups = actors_count(ACTOR_PICKUP);
+        DEBUG->n_enemies = actors_count(ACTOR_SAUCER) + actors_count(ACTOR_LADYBUG);
+        const Actor *p = actors_first(ACTOR_PICKUP);
+        DEBUG->pickup_x = p ? UNFIX(p->x) : -1; DEBUG->pickup_y = p ? UNFIX(p->y) : -1;
+        const Actor *e = actors_first(ACTOR_SAUCER); if (!e) e = actors_first(ACTOR_LADYBUG);
+        DEBUG->enemy_x = e ? UNFIX(e->x) : -1; DEBUG->enemy_y = e ? UNFIX(e->y) : -1;
 
         vid_vsync();
         vid_flip();

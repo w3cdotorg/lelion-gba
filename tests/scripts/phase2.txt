@@ -1,7 +1,17 @@
 # Debug block: +20 progress (permil), +24 colors, +36 won
 run 30
-expect32 0x02030018 1
+expect32 0x02030018 0
 expect32 0x02030014 0
+# first pickup appears at (120, 60) one game-second in (init takes ~16 frames): walk into it
+run 70
+expect32 0x02030028 1
+expect32 0x02030030 120
+keys RIGHT
+run 60
+keys
+run 5
+expect32 0x02030018 1
+expect32 0x02030028 0
 # dive to the bottom and puke: the jet lands on the ground row, always a building
 keys A,DOWN
 run 120

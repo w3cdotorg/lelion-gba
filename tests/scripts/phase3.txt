@@ -1,0 +1,17 @@
+# +28 lives, +44 n_enemies, +56 invuln, +60 enemy_x, +64 enemy_y, +68 over
+run 30
+expect32 0x0203001C 3
+expect32 0x0203002C 0
+# the saucer shows up at 3 s (game time), at y = 61: the lion waits at (40, 60) and gets hit
+run 190
+expect_range32 0x0203002C 1 2
+expect32 0x02030040 61
+run 110
+expect32 0x0203001C 2
+expect_range32 0x02030038 1 90
+shot p3_hit
+# one hit only: the saucer passes through during the invulnerability window
+run 150
+expect32 0x0203001C 2
+expect32 0x02030044 0
+shot p3_enemies

@@ -31,8 +31,13 @@ typedef struct {
     int colors;        // unlocked colours (0..7), rainbow order
     int progress;      // 0..1000
     int won;
+    int over;          // no lives left
+    int lives;
+    int invuln;        // frames of invulnerability left after a hit
     u32 frame;
 } Game;
+#define LIVES_MAX 3
+#define INVULN_FRAMES 90
 extern Game game;
 
 // Small LCG, good enough for speckles.
@@ -47,7 +52,7 @@ static inline s32 borne(s32 v, s32 lo, s32 hi) { return v < lo ? lo : (v > hi ? 
 
 // Fixed point 8.8 helpers.
 #define FIX_SHIFT 8
-#define FIX(x)    ((x) << FIX_SHIFT)
+#define FIX(x)    ((x) * (1 << FIX_SHIFT))
 #define UNFIX(x)  ((x) >> FIX_SHIFT)
 
 // Debug/inspection block at a fixed EWRAM address, read by the headless test harness.
@@ -62,5 +67,10 @@ typedef struct {
     u32 lives;
     u32 puking;
     u32 won;
+    u32 n_pickups, n_enemies;   // +40, +44
+    s32 pickup_x, pickup_y;     // +48, +52  first live pickup (world)
+    u32 invuln;                 // +56
+    s32 enemy_x, enemy_y;       // +60, +64  first live enemy (world)
+    u32 over;                   // +68
 } DebugState;
 #define DEBUG ((volatile DebugState *)0x02030000)
