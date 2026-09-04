@@ -1,0 +1,17 @@
+# Debug block: +20 progress (permil), +24 colors, +36 won
+run 30
+expect32 0x02030018 1
+expect32 0x02030014 0
+# dive to the bottom and puke: the jet lands on the ground row, always a building
+keys A,DOWN
+run 120
+expect_range32 0x02030014 1 60
+shot p2_puke_static
+# sweep right while puking: progress grows
+keys A,RIGHT
+run 240
+expect_range32 0x02030014 30 400
+shot p2_sweep
+keys
+run 10
+expect32 0x02030024 0

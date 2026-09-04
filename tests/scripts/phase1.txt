@@ -20,4 +20,6 @@ keys RIGHT
 run 300
 expect32 0x02030004 448
 expect32 0x0203000C 240
+# the game loop must keep up with the 60 Hz vblank: frame counter (+16) close to the harness count
+expect_range32 0x02030010 500 540
 shot p1_right_edge

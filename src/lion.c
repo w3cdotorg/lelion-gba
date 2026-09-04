@@ -7,7 +7,7 @@
 #define TILE_IDLE    512                  // bitmap modes: OBJ tiles start at 512
 #define TILE_PUKE    (512 + 16)
 #define LION_Y_MIN   HUD_H
-#define LION_Y_MAX   (SCREEN_HEIGHT - 40)  // keeps the jet inside the screen
+#define LION_Y_MAX   94                    // jet landing (y + 65) reaches the bottom town row
 
 Lion lion;
 

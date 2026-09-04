@@ -10,7 +10,7 @@ void town_init(void) {
             town[y][x] = skyline_pixels[y * TOWN_W + x] ? PAL_BUILDING : 0;
 }
 
-void town_render(int cam_x) {
+IWRAM_CODE void town_render(int cam_x) {
     cam_x &= ~1;  // 16-bit aligned source for DMA
     u8 *page = (u8 *)vid_page;
     for (int y = 0; y < TOWN_H; y++)

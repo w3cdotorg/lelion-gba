@@ -19,6 +19,28 @@
 #define PAL_SKY0      240        // 16 sky shades: 240..255
 
 #define NB_COLORS 7
+#define RGB15C(r, g, b) ((r) | ((g) << 5) | ((b) << 10))   // constant-expression RGB15
+extern const u16 RAINBOW[NB_COLORS];
+#define CELL      4                       // coverage grid cell size in pixels
+#define GRID_W    (TOWN_W / CELL)
+#define GRID_H    (TOWN_H / CELL)
+#define WIN_PERMIL 850                    // 85 % of paintable cells
+
+// Global game state.
+typedef struct {
+    int colors;        // unlocked colours (0..7), rainbow order
+    int progress;      // 0..1000
+    int won;
+    u32 frame;
+} Game;
+extern Game game;
+
+// Small LCG, good enough for speckles.
+static inline u32 rnd(void) {
+    extern u32 rnd_seed;
+    rnd_seed = rnd_seed * 1664525u + 1013904223u;
+    return rnd_seed >> 16;
+}
 
 // Inclusive clamp (tonc's clamp() excludes the upper bound).
 static inline s32 borne(s32 v, s32 lo, s32 hi) { return v < lo ? lo : (v > hi ? hi : v); }
@@ -39,5 +61,6 @@ typedef struct {
     u32 colors;           // unlocked colour count
     u32 lives;
     u32 puking;
+    u32 won;
 } DebugState;
 #define DEBUG ((volatile DebugState *)0x02030000)
