@@ -1,0 +1,7 @@
+build/
+*.gba
+*.elf
+*.sav
+*.map
+.DS_Store
+tests/out/
