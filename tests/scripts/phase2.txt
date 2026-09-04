@@ -32,6 +32,7 @@ run 10
 expect32 0x02030024 0
 # performance: seven colours, puking while sweeping, the loop must not drop frames
 poke32 0x02030088 7
+poke32 0x02030090 0
 peek32 0x02030010
 keys A,LEFT
 run 120
@@ -41,4 +42,6 @@ keys
 poke32 0x02030088 0
 # 240 harness frames later the game's frame counter must have advanced by 240 (no dropped frames)
 expect_range32 0x02030010 905 911
+# CPU load guard: worst scanline reached must stay below 100 (~75 % of the frame, incl. vblank)
+expect_range32 0x02030090 0 100
 shot p2_seven_colours

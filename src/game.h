@@ -114,5 +114,7 @@ typedef struct {
     u32 arcade, stage;          // +124, +128
     u32 new_best;               // +132
     u32 cheat_colors;           // +136 written by the test harness: forces the unlocked colour count
+    u32 load_vcount;            // +140 scanline reached when the frame's work is done (160 = vblank start, 228 = full frame)
+    u32 load_max;               // +144 worst scanline since boot
 } DebugState;
 #define DEBUG ((volatile DebugState *)0x02030000)

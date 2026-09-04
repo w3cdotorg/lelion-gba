@@ -249,6 +249,12 @@ int main(void) {
         DEBUG->stage = cfg.stage;
         DEBUG->new_best = game.new_best;
 
+        // CPU load: which scanline are we on when the work is done? < 160 means we finished during
+        // the visible frame; 160..227 is inside vblank; wrapping past 228 would mean a dropped frame.
+        u32 vc = REG_VCOUNT;
+        DEBUG->load_vcount = vc;
+        if (vc > DEBUG->load_max) DEBUG->load_max = vc;
+
         vid_vsync();
         vid_flip();
     }

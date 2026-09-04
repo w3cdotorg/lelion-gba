@@ -63,6 +63,7 @@ tests/run.sh            # needs libmgba (brew install mgba / apt install libmgba
 ```
 
 The game exposes a small debug block at `0x02030000` (lion position, camera, progress, lives,
-state...) that the scripts assert on; `cheat_win` in that block lets a test force a victory.
+state, CPU load as the scanline reached when the frame's work is done...) that the scripts assert
+on; `cheat_win` and `cheat_colors` in that block let a test force a victory or a colour count.
 
 See `PLAN.md` for the porting plan and progress.
