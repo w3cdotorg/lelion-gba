@@ -88,7 +88,8 @@ static void apply_sound(void) {
 static void update_title(void) {
     if (key_hit(KEY_UP)) title_row = (title_row + 3) % 4;
     if (key_hit(KEY_DOWN)) title_row = (title_row + 1) % 4;
-    int d = key_hit(KEY_RIGHT) - key_hit(KEY_LEFT);
+    // key_hit() returns the key mask, not a boolean: normalise to -1 / 0 / +1.
+    int d = (key_hit(KEY_RIGHT) ? 1 : 0) - (key_hit(KEY_LEFT) ? 1 : 0);
     if (d) {
         if (title_row == 0) cfg.difficulty = (cfg.difficulty + d + NB_DIFFICULTIES) % NB_DIFFICULTIES;
         else if (title_row == 1) { cfg.level = (cfg.level + d + NB_LEVELS) % NB_LEVELS; town_init(cfg.level); }

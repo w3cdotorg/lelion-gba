@@ -3,7 +3,18 @@
 run 30
 expect32 0x02030058 0
 expect32 0x02030064 0
-# title: RIGHT twice on the difficulty row -> HARD ; DOWN then RIGHT -> level 1
+# title: LEFT wraps the difficulty to HARD, RIGHT back to EASY, RIGHT twice -> HARD ;
+# DOWN then LEFT wraps the level to 2, RIGHT RIGHT -> level 1
+keys LEFT
+run 4
+keys
+run 4
+expect32 0x02030064 2
+keys RIGHT
+run 4
+keys
+run 4
+expect32 0x02030064 0
 keys RIGHT
 run 4
 keys
@@ -14,6 +25,15 @@ keys
 run 4
 expect32 0x02030064 2
 keys DOWN
+run 4
+keys
+run 4
+keys LEFT
+run 4
+keys
+run 4
+expect32 0x02030068 2
+keys RIGHT
 run 4
 keys
 run 4
