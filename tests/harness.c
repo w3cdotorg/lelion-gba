@@ -14,9 +14,15 @@
 #include <string.h>
 #include <mgba/core/core.h>
 #include <mgba/core/interface.h>
+#include <mgba/core/log.h>
 
 // GBA key bit order (also what mCore::setKeys expects).
 enum { GBA_KEY_A, GBA_KEY_B, GBA_KEY_SELECT, GBA_KEY_START, GBA_KEY_RIGHT, GBA_KEY_LEFT, GBA_KEY_UP, GBA_KEY_DOWN, GBA_KEY_R, GBA_KEY_L };
+
+static void log_muet(struct mLogger *l, int cat, enum mLogLevel lvl, const char *fmt, va_list args) {
+    (void)l; (void)cat; (void)lvl; (void)fmt; (void)args;
+}
+static struct mLogger logger = { .log = log_muet };
 
 static int echecs = 0;
 static unsigned largeur, hauteur;
@@ -58,6 +64,7 @@ static void ecrire_ppm(const char *chemin) {
 
 int main(int argc, char **argv) {
     if (argc < 4) { fprintf(stderr, "usage: harness ROM SCRIPT OUTDIR\n"); return 2; }
+    mLogSetDefaultLogger(&logger);
     struct mCore *core = mCoreFind(argv[1]);
     if (!core) { fprintf(stderr, "ROM illisible : %s\n", argv[1]); return 2; }
     core->init(core);

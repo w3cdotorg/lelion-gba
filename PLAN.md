@@ -19,7 +19,7 @@ Target: the same game as the Godot version, on a 240×160 screen.
 ## Phases
 
 - [x] 0. Toolchain: Docker build, mode 4 hello ROM, headless emulator check
-- [ ] 1. Scrolling town: skyline bitmap, camera, lion sprite and movement
+- [x] 1. Scrolling town: skyline bitmap, camera, lion sprite and movement
 - [ ] 2. Painting: rainbow jet, paint into the bitmap, coverage and progress bar
 - [ ] 3. Pickups and enemies: color dots, saucer, ladybug, hearts, invulnerability
 - [ ] 4. Sound: sequencer on GB channels, town theme, effects

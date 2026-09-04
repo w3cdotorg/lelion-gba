@@ -1,0 +1,23 @@
+# Debug block: 0x02030000 magic, +4 lion_x, +8 lion_y, +12 cam_x, +16 frame, +32 puking
+run 30
+expect32 0x02030000 0x4C494F4E
+expect32 0x02030004 40
+expect32 0x0203000C 0
+shot p1_start
+keys RIGHT
+run 120
+expect_range32 0x02030004 190 230
+expect_range32 0x0203000C 90 130
+keys RIGHT,A
+run 60
+expect32 0x02030020 1
+shot p1_scrolled_puking
+keys
+run 30
+expect32 0x02030020 0
+expect_range32 0x02030004 290 340
+keys RIGHT
+run 300
+expect32 0x02030004 448
+expect32 0x0203000C 240
+shot p1_right_edge
