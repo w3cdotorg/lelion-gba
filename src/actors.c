@@ -101,9 +101,23 @@ void actors_init(void) {
     next_heart_frame = HEART_EVERY;
 }
 
+static int rect_overlaps(int ax, int ay, int aw, int ah, int lx, int ly, int lw, int lh) {
+    return ax < lx + lw && ax + aw > lx && ay < ly + lh && ay + ah > ly;
+}
+
+// The saucer's 32x16 sprite is a disc: only rows 6..11 span the full width, the dome above and
+// the skirt below are about 16 px wide. Its hitbox is that cross, so the empty corners never hit.
+#define SAUCER_RIM_Y   6
+#define SAUCER_RIM_H   6
+#define SAUCER_CORE_X  8
+#define SAUCER_CORE_W  16
+
 static int overlaps(const Actor *a, int lx, int ly, int lw, int lh) {
     int ax = UNFIX(a->x), ay = UNFIX(a->y);
-    return ax < lx + lw && ax + a->w > lx && ay < ly + lh && ay + a->h > ly;
+    if (a->type == ACTOR_SAUCER)
+        return rect_overlaps(ax, ay + SAUCER_RIM_Y, a->w, SAUCER_RIM_H, lx, ly, lw, lh)
+            || rect_overlaps(ax + SAUCER_CORE_X, ay, SAUCER_CORE_W, a->h, lx, ly, lw, lh);
+    return rect_overlaps(ax, ay, a->w, a->h, lx, ly, lw, lh);
 }
 
 void actors_update(void) {

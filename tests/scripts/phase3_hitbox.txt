@@ -1,0 +1,30 @@
+# Saucer hitbox is a cross (full-width rim + narrow core), not the whole 32x16 box.
+# +4 lion_x, +8 lion_y, +28 lives, +44 n_enemies, +56 invuln, +60 enemy_x, +64 enemy_y
+run 30
+keys START
+run 2
+keys
+run 160
+# DOWN for 8 frames then coast: the lion settles exactly 12 px lower, at (40, 72).
+# Its hitbox (44..67, 76..99) then only touches the saucer's bottom row (y = 76, 13 px wide).
+keys DOWN
+run 8
+keys
+run 20
+expect32 0x02030004 40
+expect32 0x02030008 72
+run 150
+expect32 0x0203002C 1
+expect32 0x02030040 61
+expect32 0x0203001C 3
+# saucer at x = -29 here, 1 px/frame. Its empty bottom-left corner sweeps the lion from x = 13:
+# no hit until the 16 px core (x + 8 .. x + 23) reaches the lion at x = 21.
+run 46
+expect32 0x0203003C 17
+expect32 0x0203001C 3
+expect32 0x02030038 0
+run 8
+expect32 0x0203003C 25
+expect32 0x0203001C 2
+expect_range32 0x02030038 80 90
+shot p3_hitbox
