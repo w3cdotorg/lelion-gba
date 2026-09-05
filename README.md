@@ -28,7 +28,7 @@ layer in mode 4, and a chiptune soundtrack on the Game Boy sound channels.
 | Puke | A |
 | Pause / resume | Start |
 | Quit to title (paused) | Select |
-| Menus | D-pad to choose, Start or A to confirm, R for next level on the summary |
+| Menus | D-pad to choose, Start or A to confirm, on the summary A goes to the next level, R replays it |
 
 ## Building
 

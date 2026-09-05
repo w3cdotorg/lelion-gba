@@ -22,4 +22,10 @@ poke32 0x0203006C 0
 expect32 0x02030058 5
 expect32 0x02030084 1
 expect_range8 0x0E000010 1 5
+# summary screen, VRAM page 0 (mode 4, 240 bytes per row): the button hints at y = 140 sit on a dark
+# strip (PAL_HUD_BG = 9), the town stays visible between the two panels (y = 130) and below (y = 156)
+expect8 0x06008348 9
+expect8 0x06008428 9
+expect_range8 0x060079E8 0 8
+expect_range8 0x06009248 0 8
 shot p7_new_best

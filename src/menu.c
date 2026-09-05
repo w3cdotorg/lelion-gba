@@ -77,6 +77,24 @@ static void ratio(char *buf, int a, int b) {   // "a/b" for small numbers
     buf[i++] = '0' + b % 10; buf[i] = 0;
 }
 
+// Button hints of the end-of-level screens, on their own dark strip so they stay readable
+// over the painted town.
+#define HINTS_Y 140
+static void draw_hints(const char *s) {
+    panel_render(HINTS_Y - 8, HINTS_Y + 12);
+    // Words ending in ':' are button names: yellow, like the values on the title screen.
+    int x = (SCREEN_WIDTH - text_width(s, 1)) / 2;
+    char word[16];
+    for (const char *p = s; *p;) {
+        if (*p == ' ') { p++; x += 6; continue; }
+        int n = 0;
+        while (*p && *p != ' ' && n < 15) word[n++] = *p++;
+        word[n] = 0;
+        text_draw_shadow(x, HINTS_Y, word, word[n - 1] == ':' ? PAL_YELLOW : PAL_HUD_FG, 1);
+        x += 6 * n;
+    }
+}
+
 void menu_draw_arcade_end(void) {
     panel_render(48, 128);
     text_draw_centered_shadow(22, "ARCADE CLEARED!", PAL_YELLOW, 2);
@@ -84,7 +102,7 @@ void menu_draw_arcade_end(void) {
     draw_time(150, 60, game.arcade_time, PAL_HUD_FG, 1);
     text_draw(48, 72, "LAST STAGE", PAL_GREY, 1);
     draw_time(150, 72, game.time, PAL_HUD_FG, 1);
-    text_draw_centered_shadow(140, "START: MENU", PAL_HUD_FG, 1);
+    draw_hints("START: MENU");
 }
 
 void menu_draw_summary(int won, int can_next) {
@@ -112,6 +130,6 @@ void menu_draw_summary(int won, int can_next) {
     text_draw(150, y, buf, PAL_HUD_FG, 1);
     if (won && game.hits == 0) text_draw_centered(y + 16, "FLAWLESS!", PAL_PAINT0 + 3, 1);
     if (won && game.new_best) text_draw_shadow(48, 118, "NEW BEST!", PAL_YELLOW, 1);
-    if (cfg.arcade) text_draw_centered_shadow(140, won ? "A: NEXT STAGE   START: MENU" : "A: RETRY   START: MENU", PAL_HUD_FG, 1);
-    else text_draw_centered_shadow(140, can_next ? "R: NEXT   A: AGAIN   START: MENU" : "A: AGAIN   START: MENU", PAL_HUD_FG, 1);
+    if (cfg.arcade) draw_hints(won ? "A: NEXT STAGE   START: MENU" : "A: RETRY   START: MENU");
+    else draw_hints(can_next ? "A: NEXT   R: AGAIN   START: MENU" : "A: AGAIN   START: MENU");
 }

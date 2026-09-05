@@ -1,0 +1,33 @@
+# Victory screen keys: A goes on to the next level, R replays the same level.
+# +88 state (1 = INTRO, 5 = SUMMARY), +104 level, +108 cheat_win
+run 30
+keys START
+run 4
+keys
+run 170
+poke32 0x0203006C 1
+run 5
+poke32 0x0203006C 0
+run 10
+expect32 0x02030058 5
+expect32 0x02030068 0
+# A: next level (1, metropolis)
+keys A
+run 2
+keys
+run 5
+expect32 0x02030058 1
+expect32 0x02030068 1
+# win again, then R: same level again
+run 170
+poke32 0x0203006C 1
+run 5
+poke32 0x0203006C 0
+run 10
+expect32 0x02030058 5
+keys R
+run 2
+keys
+run 5
+expect32 0x02030058 1
+expect32 0x02030068 1

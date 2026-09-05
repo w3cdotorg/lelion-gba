@@ -82,14 +82,14 @@ expect32 0x02030058 1
 expect32 0x0203001C 1
 run 160
 expect32 0x02030058 2
-# forced win through the test hook -> summary, won; R goes to the next level
+# forced win through the test hook -> summary, won; A goes to the next level
 poke32 0x0203006C 1
 run 5
 expect32 0x02030058 5
 expect32 0x02030024 1
 shot p5_summary
 poke32 0x0203006C 0
-keys R
+keys A
 run 4
 keys
 run 40

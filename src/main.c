@@ -190,8 +190,12 @@ int main(void) {
             int can_next = !cfg.arcade && game.won && cfg.level + 1 < NB_LEVELS;
             if (key_hit(KEY_START)) go_title();
             else if (arcade_done) break;
-            else if (key_hit(KEY_A)) { if (cfg.arcade && game.won) cfg.stage++; start_level(); }
-            else if (can_next && key_hit(KEY_R)) { cfg.level++; start_level(); }
+            else if (key_hit(KEY_A)) {           // A carries on: next stage / next level, or again when there is none
+                if (cfg.arcade && game.won) cfg.stage++;
+                else if (can_next) cfg.level++;
+                start_level();
+            }
+            else if (can_next && key_hit(KEY_R)) start_level();   // R: the same level again
             break;
         }
         }
